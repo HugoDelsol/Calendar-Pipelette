@@ -1,0 +1,32 @@
+---
+config:
+  layout: elk
+  theme: neo-dark
+  look: neo
+---
+flowchart LR
+ subgraph subGraph0["Calendar From Pipelette"]
+        UC1("Sign Up")
+        UC2("Browse Services")
+        UC3("Delete Account")
+        UC4("Book Appointment")
+        UC5("View Calendar")
+        UC6("Manage Services")
+        UC7("Update Availability")
+        UC8("Sign In")
+        UC9("Manage Customers")
+        UC10("Edit Profile")
+        UC11("Cancel Appointment")
+        UC12("Sign Out")
+  end
+    Customer(("User")) --- UC1 & UC2 & UC8 & UC4 & UC5 & UC10 & UC11 & UC3 & UC12
+    Admin(("Admin")) --- UC1 & UC8 & UC5 & UC6 & UC7 & UC9 & UC11 & UC12
+    UC4 -. include .-> UC8
+    UC5 -. include .-> UC8
+    UC6 -. include .-> UC8
+    UC7 -. include .-> UC8
+    UC9 -. include .-> UC8
+    UC10 -. include .-> UC8
+    UC11 -. include .-> UC8
+    UC3 -. include .-> UC8
+    UC8 --- BDD[("Database")]
