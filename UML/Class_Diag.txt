@@ -1,0 +1,103 @@
+classDiagram
+    class User {
+        - int idUser
+        - string name
+        - string phone
+        - string email
+        - Role role
+        + viewAppointments() List
+    }
+
+    class Client {
+        - string clientNotes
+        + getClientNotes() string
+        + setClientNotes(note: string) void
+        + makeAnAppointment(date, hour) Appointment
+    }
+
+    class Professional {
+        - string specialty
+        + updateSpeciality(newSpeciality: string) void
+        + updateClientNote(client: Client, newNote: string)
+        + updateAppointmentNote(app: Appointment, newNote: string)
+        + viewDetailOfAppointment(app: Appointment)
+    }
+
+    class Appointment {
+        - int id
+        - date appointmentDate
+        - time appointmentHour
+        - string appointmentNote
+        - status AppointmentStatus 
+        + getAppointmentNote() string
+        + setAppointmentNote(note: string) void
+        + update(newDate: date, newHour: time) bool
+        + cancel() bool
+    }
+
+    User <|-- Client
+    User <|-- Professional
+    Client "1" --> "*" Appointment : has
+    Professional "1" --> "*" Appointment : manage
+
+
+------------------------------------------------------------------------------------------------------------
+
+
+---
+config:
+  layout: elk
+  theme: neo-dark
+---
+classDiagram
+    class User {
+        - int idUser
+        - string name
+        - string phone
+        - string email
+        - Role role
+        + viewAppointments() List<Appointment>
+    }
+
+    class Client {
+        - string clientNotes
+        + update(data: Client) bool
+        + getClientNotes() string
+        + setClientNotes(note: string) void
+        + makeAnAppointment(date: Date, time: Time, pro: Professional, svc: Service) Appointment
+    }
+
+    class Professional {
+        - string specialty
+        + createService(service: Service) Service
+        + update(data: Professional) bool        
+    }
+
+    class Appointment {
+        - int id
+        - date appointmentDate
+        - time appointmentHour
+        - string appointmentNote
+        - status AppointmentStatus 
+        + getDetails() Appointment
+        + getAppointmentNote() string
+        + setAppointmentNote(note: string) void
+        + update(data: Appointment) bool
+        + cancel() bool
+    }
+
+    class Service {
+        - int id
+        - string serviceTitle
+        - text serviceDescription
+        - float servicePrice
+        - time serviceTime
+        + update(data: Service) bool
+    }
+
+    User <|-- Client
+    User <|-- Professional
+    Client "1" --> "*" Appointment : has
+    Professional "1" --> "*" Appointment : manage
+    Professional "1" --> "*" Service : manage
+    Appointment "1" --> "1" Service
