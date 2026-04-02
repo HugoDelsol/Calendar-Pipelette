@@ -1,0 +1,100 @@
+erDiagram
+
+    Customer ||--o{ Appointment : ""
+    Admin ||--o{ Appointment : ""
+    Auth ||--|| Admin : ""
+    Auth ||--|| Customer : ""
+    Admin ||--|| Time_slot : ""
+
+    Service {
+        string id_service PK
+        string name_service
+        string description_service
+        num price_service
+    }
+    Customer {
+        string id_customer PK
+        string phone_customer
+        date current_date
+    }
+    Admin {
+        int id_admin PK
+        string name_admin
+        string phone_admin
+        date current_date
+    }
+    Auth {
+        int id_auth PK
+        string user_mail UK
+        string user_password 
+        int _id_admin
+        int _id_customer
+    }
+    Appointment {
+        int id_appointment PK        
+        date appointment_date
+        int _id_service FK
+        int _id_customer FK
+        int _id_admin FK
+    }
+    Time_slot {
+        int id_Time_slot PK
+        date time_slot_date
+        hour time_slot_hour
+        int _id_admin FK
+    }
+
+
+
+LAST VERSION -----------------------------------
+
+
+---
+config:
+  layout: elk
+  theme: neo-dark
+---
+erDiagram
+
+    User ||--o{ Appointment : ""
+    User ||--o{ User_time_slot : ""
+    Time_slot ||--o{ User_time_slot : ""
+    Time_slot ||--o{ Appointment : ""
+    Service ||--o{ Appointment : ""
+
+    User {
+        int id_user PK
+        string user_email UK
+        string user_phone
+        string user_password
+        enum user_role
+    }
+
+    Service {
+        int id_service PK
+        string name_service
+        string description_service
+        decimal price_service
+    }   
+
+    Time_slot {
+        int id_time_slot PK
+        date time_slot_date
+        time time_slot_hour
+    }
+
+    User_time_slot {
+        int id_user_time_slot PK
+        int _id_user FK
+        int _id_time_slot FK
+    }
+
+    Appointment {
+      int id_appointment PK        
+      int _id_customer FK
+      int _id_provider FK
+      int _id_service FK
+      int _id_time_slot FK
+      string status
+  }
+
