@@ -1,0 +1,80 @@
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant P as Professional
+    participant R as RepositoryService
+    participant S as Service
+
+    U->>P: createService(title, price, ...)
+    activate P
+        # Le Pro vérifie lui-même la disponibilité via le Repo
+        P->>R: checkNameAvailable(title)
+        activate R
+            R-->>P: status
+        deactivate R
+        
+        alt status === false
+            P-->>U: "Error: Name already exists"
+        else status === true
+            # Le Pro instancie le Service
+            P->>S: <<create>>(title, price, proRef)
+            activate S
+                S-->>P: serviceInstance
+            deactivate S
+            
+            # Le Pro demande au Repo de sauvegarder son nouveau service
+            P->>R: save(serviceInstance)
+            activate R
+                R-->>P: success
+            deactivate R
+            
+            P-->>U: "Service created successfully"
+        end
+    deactivate P
+
+
+
+-------------------------------
+
+
+
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant C as Client
+    participant P as Professional
+    participant R as Repository
+    participant A as Appointment
+
+    U->>C: makeAnAppointment(date, svc)
+    activate C
+        C->>P: checkAvailability(date)
+        activate P
+            P->>R: isAvailable(date)
+            activate R
+                R-->>P: status
+            deactivate R
+            
+            alt status === false
+                P-->>C: availabilityError
+                deactivate P
+                C-->>U: "Timeslot unavailable"
+            
+            else status === true
+            activate P
+                P-->>C: availabilityOK
+                deactivate P
+                
+                C->>A: <<create>>(date, svc, pro)
+                activate A
+                    A-->>C: appointmentInstance
+                deactivate A
+                
+                C->>R: saveAppointment(appointment)
+                activate R
+                    R-->>C: success
+                deactivate R
+                
+                C-->>U: "Appointment confirmed"
+            end
+    deactivate C
