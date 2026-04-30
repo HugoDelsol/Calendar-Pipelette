@@ -1,1 +1,1 @@
-![Use Case](Design/Home Page Pipelette.png)
+![Home Page](Design/HomePagePipelette.png)
