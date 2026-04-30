@@ -5,12 +5,15 @@ import {
     type CalendarEventExternal,
 } from '@schedule-x/calendar'
 import { createEventsServicePlugin } from '@schedule-x/events-service'
-import '@schedule-x/theme-default/dist/index.css'
 import { useMemo } from 'react'
+
+
+import '@schedule-x/theme-default/dist/index.css'
 import 'temporal-polyfill/global'
+import type { AppEvent } from '../types/AppEvent'
 
 type UseProviderCalendarProps = {
-    onEventClick: (event: CalendarEventExternal) => void
+    onEventClick: (event: AppEvent) => void
 }
 
 function useProviderCalendar({ onEventClick }: UseProviderCalendarProps) {
@@ -32,14 +35,13 @@ function useProviderCalendar({ onEventClick }: UseProviderCalendarProps) {
 
     const calendar = useCalendarApp({
         views: [createViewMonthGrid(), createViewMonthAgenda()],
-        events,
+        events: events,
         plugins: [eventsService],
         locale: 'fr-FR',
 
         callbacks: {
             onEventClick: (calendarEvent: CalendarEventExternal) => {
-                console.log("testtttttttttt")
-                onEventClick(calendarEvent)
+                onEventClick(calendarEvent as AppEvent)
             },
         },
     })
