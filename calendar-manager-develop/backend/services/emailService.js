@@ -72,6 +72,31 @@ async function envoyerConfirmationEmail(email, clientNom, serviceNom, dateHeure,
     });
 }
 
+async function envoyerNotificationEntreprise(emailEntreprise, entrepriseNom, clientNom, serviceNom, dateHeure) {
+    const dateFormatee = new Date(dateHeure).toLocaleString('fr-FR', {
+        weekday: 'long', day: 'numeric', month: 'long',
+        hour: '2-digit', minute: '2-digit'
+    });
+
+    return envoyerEmail({
+        sender: { name: 'Calendar Manager', email: process.env.BREVO_SENDER_EMAIL },
+        to: [{ email: emailEntreprise }],
+        subject: `Nouveau rendez-vous — ${clientNom}`,
+        htmlContent: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #6366f1;">Nouveau rendez-vous 📅</h2>
+                <p>Un client vient de réserver un rendez-vous :</p>
+                <div style="background: #f8f8ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #6366f1;">
+                    <p><strong>👤 Client :</strong> ${clientNom}</p>
+                    <p><strong>✂️ Service :</strong> ${serviceNom}</p>
+                    <p><strong>📅 Date :</strong> ${dateFormatee}</p>
+                </div>
+                <p style="color: #888; font-size: 12px;">— Calendar Manager</p>
+            </div>
+        `
+    });
+}
+
 // Rappel post-RDV (template configurable par l'entreprise)
 async function envoyerRappelPostRdv(email, clientNom, titre, message, entrepriseNom, entrepriseId) {
     return envoyerEmail({
@@ -125,4 +150,5 @@ module.exports = {
     envoyerConfirmationEmail,
     envoyerRappelPostRdv,
     envoyerResetMotDePasse,
+    envoyerNotificationEntreprise,
 };

@@ -14,6 +14,7 @@ const reglesTemplate = [
     body('message').optional().trim().isLength({ max: 1000 }).stripLow(),
     body('delai_jours').isInt({ min: 1 }).withMessage('Délai invalide'),
     body('service_id').isInt({ min: 1 }).withMessage('Service requis'),
+    body('type').isIn(['avant', 'apres']).withMessage('Type invalide'),
     body('actif').optional().isBoolean()
 ];
 

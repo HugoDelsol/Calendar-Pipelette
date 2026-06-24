@@ -34,10 +34,10 @@ async function createTemplate(entreprise_id, service_id, titre, message, delai_j
     return result.insertId;
 }
 
-async function updateTemplate(id, entreprise_id, service_id, titre, message, delai_jours, actif) {
+async function updateTemplate(id, entreprise_id, service_id, titre, message, delai_jours, actif, type) {
     await pool.query(
-        'UPDATE rappel_templates SET service_id = ?, titre = ?, message = ?, delai_jours = ?, actif = ? WHERE id = ? AND entreprise_id = ?',
-        [service_id || null, titre, message, delai_jours, actif, id, entreprise_id]
+        'UPDATE rappel_templates SET service_id = ?, titre = ?, message = ?, delai_jours = ?, actif = ?, type = ? WHERE id = ? AND entreprise_id = ?',
+        [service_id || null, titre, message, delai_jours, actif, type, id, entreprise_id]
     );
 }
 
@@ -50,19 +50,23 @@ async function deleteTemplate(id, entreprise_id) {
 
 // ── RAPPELS PROGRAMMES ─────────────────────────────────────
 
-// Appelé quand un RDV est marqué terminé
-async function genererRappels(entreprise_id, rdv_id, service_id, client_id, date_rdv) {
-    // Cherche les templates actifs pour ce service OU globaux (service_id NULL)
+async function genererRappels(entreprise_id, rdv_id, service_id, client_id, date_rdv, typeRappel) {
+
     const [templates] = await pool.query(`
         SELECT * FROM rappel_templates
         WHERE entreprise_id = ?
           AND actif = TRUE
-          AND (service_id = ? OR service_id IS NULL)
-    `, [entreprise_id, service_id]);
+          AND service_id = ?
+          AND type = ?
+    `, [entreprise_id, service_id, typeRappel]);
 
     for (const template of templates) {
         const dateRappel = new Date(date_rdv);
-        dateRappel.setDate(dateRappel.getDate() + template.delai_jours);
+        if (template.type === 'apres') {
+            dateRappel.setDate(dateRappel.getDate() + template.delai_jours);
+        } else {
+            dateRappel.setDate(dateRappel.getDate() - template.delai_jours);
+        }
 
         await pool.query(
             'INSERT INTO rappels_programmes (entreprise_id, client_id, rdv_id, titre, message, date_rappel) VALUES (?, ?, ?, ?, ?, ?)',
@@ -70,7 +74,7 @@ async function genererRappels(entreprise_id, rdv_id, service_id, client_id, date
         );
     }
 
-    return templates.length; // nombre de rappels générés
+    return templates.length;
 }
 
 // Appelé par le cron job

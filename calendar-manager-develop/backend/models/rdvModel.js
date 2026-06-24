@@ -3,7 +3,7 @@ const pool = require('../config/db');
 async function getAllRdv(entreprise_id) {
     const [rows] = await pool.query(`
         SELECT 
-            rv.id, rv.date_heure, rv.statut, rv.rappel_envoye,
+            rv.id, rv.date_heure, rv.statut, rv.rappel_envoye, rv.created_at,
             c.id AS client_id, c.nom AS client_nom, c.telephone AS client_telephone,
             s.id AS service_id, s.nom AS service_nom, s.duree_minutes, s.prix
         FROM rendez_vous rv

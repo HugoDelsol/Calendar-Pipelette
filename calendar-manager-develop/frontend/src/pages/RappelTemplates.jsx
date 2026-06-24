@@ -11,7 +11,7 @@ export default function RappelTemplates() {
     const [templateEnEdition, setTemplateEnEdition] = useState(null);
     const [erreur, setErreur] = useState('');
     const [form, setForm] = useState({
-        titre: '', message: '', delai_jours: '', service_id: '', actif: true
+        titre: '', message: '', delai_jours: '', service_id: '', actif: true, type: ''
     });
 
     useEffect(() => {
@@ -41,11 +41,12 @@ export default function RappelTemplates() {
                 message: template.message || '',
                 delai_jours: template.delai_jours,
                 service_id: template.service_id || '',
-                actif: template.actif
+                actif: template.actif,
+                type: template.type 
             });
         } else {
             setTemplateEnEdition(null);
-            setForm({ titre: '', message: '', delai_jours: '', service_id: '', actif: true });
+            setForm({ titre: '', message: '', delai_jours: '', service_id: '', actif: true, type: '' });
         }
         setAfficherFormulaire(true);
         setErreur('');
@@ -116,7 +117,7 @@ export default function RappelTemplates() {
                 <div>
                     <h1 style={styles.titre}>🔔 Templates de rappel</h1>
                     <p style={styles.sousTitre}>
-                        Configurez des rappels automatiques envoyés après chaque rendez-vous terminé
+                        Configurez des rappels automatiques envoyés avant ou après chaque rendez-vous terminé
                     </p>
                 </div>
                 <button onClick={() => ouvrirFormulaire()} style={styles.boutonAjouter} className='bouton-ajouter'>
@@ -161,7 +162,7 @@ export default function RappelTemplates() {
 
                             <div style={styles.rangee} className='rangee'>
                                 <div style={styles.champ}>
-                                    <label style={styles.label}>Délai après RDV (jours)</label>
+                                    <label style={styles.label}>Délai {form.type === 'avant' ? 'avant' : 'aprés'} le RDV (jours)</label>
                                     <input
                                         type="number"
                                         name="delai_jours"
@@ -194,6 +195,20 @@ export default function RappelTemplates() {
                                         ))}
                                     </select>
                                 </div>
+
+                                <div style={styles.champ}>
+                                    <label style={styles.label}>Type de rappel</label>
+                                    <select
+                                        name="type"
+                                        value={form.type}
+                                        onChange={handleChange}
+                                        style={styles.input}
+                                        required
+                                    >
+                                        <option value="apres">Après le rendez-vous</option>
+                                        <option value="avant">Avant le rendez-vous</option>
+                                    </select>
+                                </div>
                             </div>
 
                             {templateEnEdition && (
@@ -219,6 +234,7 @@ export default function RappelTemplates() {
                                     {templateEnEdition ? 'Modifier' : 'Créer'}
                                 </button>
                             </div>
+
                         </form>
                     </div>
                 </div>
@@ -229,7 +245,7 @@ export default function RappelTemplates() {
                 <div style={styles.vide}>
                     <p style={styles.videTexte}>🔔 Aucun template configuré</p>
                     <p style={styles.videDesc}>
-                        Créez des templates pour envoyer automatiquement des rappels à vos clients après leurs rendez-vous
+                        Créez des templates pour envoyer automatiquement des rappels à vos clients avant ou après leurs rendez-vous
                     </p>
                     <button onClick={() => ouvrirFormulaire()} style={styles.boutonAjouter}>
                         + Créer mon premier template
@@ -258,7 +274,7 @@ export default function RappelTemplates() {
                                 )}
                                 <div style={styles.templateMeta} className='template-meta'>
                                     <span style={styles.metaItem}>
-                                        ⏱ Envoyé {formaterDelai(template.delai_jours)} après le RDV
+                                        ⏱ Envoyé {formaterDelai(template.delai_jours)} {template.type === 'avant' ? 'avant' : 'après'} le RDV
                                     </span>
                                     <span style={styles.metaItem}>
                                         ✂️ {template.service_nom}
@@ -452,7 +468,7 @@ const styles = {
         borderRadius: '12px',
         padding: '32px',
         width: '100%',
-        maxWidth: '520px',
+        width: '70vw',
         boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
     },
     modalTitre: {
@@ -475,7 +491,7 @@ const styles = {
     },
     rangee: {
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: '1fr 1fr 1fr',
         gap: '16px'
     },
     champ: {
@@ -534,5 +550,5 @@ const styles = {
         cursor: 'pointer',
         fontSize: '14px',
         fontWeight: '600'
-    }
+    },
 };

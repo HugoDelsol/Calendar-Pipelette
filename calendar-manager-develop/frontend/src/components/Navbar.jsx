@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import axios from '../api/axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
+
+const CLE_DERNIERE_VISITE = 'rdv_derniere_visite';
 
 const liens = [
     { path: '/', label: '🏠 Dashboard' },
@@ -18,6 +21,44 @@ export default function Navbar() {
     const location = useLocation();
     const navigate = useNavigate();
     const [menuOuvert, setMenuOuvert] = useState(false);
+    const [nouveauxRdv, setNouveauxRdv] = useState(0);
+
+    // Polling toutes les 30 secondes
+    useEffect(() => {
+        async function verifierNouveauxRdv() {
+            try {
+                const res = await axios.get('/rendez-vous');
+                const derniereVisite = sessionStorage.getItem(CLE_DERNIERE_VISITE);
+
+                if (!derniereVisite) {
+                    sessionStorage.setItem(CLE_DERNIERE_VISITE, new Date().toISOString());
+                    return;
+                }
+
+                const nouveaux = res.data.filter(r =>
+                    new Date(r.created_at) > new Date(new Date(derniereVisite).getTime() - 2 * 60 * 60 * 1000)
+                    && r.statut === 'confirme'
+                );
+                setNouveauxRdv(nouveaux.length);
+
+            } catch (err) {
+                // Ne rien logger en production
+            }
+        }
+
+
+        verifierNouveauxRdv();
+        const interval = setInterval(verifierNouveauxRdv, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Reset badge quand l'entreprise visite /rendez-vous
+    useEffect(() => {
+        if (location.pathname === '/rendez-vous') {
+            setNouveauxRdv(0);
+            sessionStorage.setItem(CLE_DERNIERE_VISITE, new Date().toISOString());
+        }
+    }, [location.pathname]);
 
     function handleLogout() {
         logout();
@@ -47,7 +88,12 @@ export default function Navbar() {
                             ...(location.pathname === lien.path ? styles.lienActif : {})
                         }}
                     >
-                        {lien.label}
+                        {lien.path === '/rendez-vous' && nouveauxRdv > 0 ? (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                📅 Rendez-vous
+                                <span style={styles.badge}>{nouveauxRdv}</span>
+                            </span>
+                        ) : lien.label}
                     </Link>
                 ))}
             </div>
@@ -63,7 +109,16 @@ export default function Navbar() {
                 style={styles.hamburger}
                 className="nav-hamburger"
             >
-                {menuOuvert ? '✕' : '☰'}
+                {menuOuvert ? '✕' : (
+                    <span style={{ position: 'relative' }}>
+                        ☰
+                        {nouveauxRdv > 0 && (
+                            <span style={ styles.notifMobile }>
+                                {nouveauxRdv}
+                            </span>
+                        )}
+                    </span>
+                )}
             </button>
 
             {/* Menu mobile */}
@@ -79,7 +134,12 @@ export default function Navbar() {
                                 ...(location.pathname === lien.path ? styles.lienMobileActif : {})
                             }}
                         >
-                            {lien.label}
+                            {lien.path === '/rendez-vous' && nouveauxRdv > 0 ? (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                                    📅 Rendez-vous
+                                    <span style={styles.badge}>{nouveauxRdv}</span>
+                                </span>
+                            ) : lien.label}
                         </Link>
                     ))}
                     <button
@@ -190,5 +250,32 @@ const styles = {
         fontWeight: '500',
         textAlign: 'left',
         marginTop: '8px'
+    },
+    notifMobile: {
+        position: 'absolute',
+        top: '-8px',
+        right: '-8px',
+        backgroundColor: '#ef4444',
+        color: 'white',
+        borderRadius: '50%',
+        width: '16px',
+        height: '16px',
+        fontSize: '10px',
+        fontWeight: '700',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    badge: {
+        backgroundColor: '#ef4444',
+        color: 'white',
+        borderRadius: '50%',
+        width: '18px',
+        height: '18px',
+        fontSize: '11px',
+        fontWeight: '700',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     }
 };

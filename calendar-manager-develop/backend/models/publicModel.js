@@ -2,7 +2,7 @@ const pool = require('../config/db');
 
 async function getEntrepriseInfo(entrepriseId) {
     const [rows] = await pool.query(
-        'SELECT id, nom, telephone, secteur FROM entreprises WHERE id = ?',
+        'SELECT id, nom, telephone, email, secteur FROM entreprises WHERE id = ?',
         [entrepriseId]
     );
     return rows[0];

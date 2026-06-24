@@ -9,6 +9,7 @@ const horaireModel = require('../models/horaireModel');
 const authOptionnel = require('../middleware/authOptionnel');
 const { reglesReservation, reglesParamEntrepriseId, valider } = require('../middleware/sanitize');
 const { limiterReservation } = require('../middleware/rateLimiter');
+const rappelModel = require('../models/rappelModel');
 
 
 // GET /api/public/:entrepriseId/info
@@ -122,9 +123,28 @@ router.post('/:entrepriseId/reserver', authOptionnel, limiterReservation, regles
         // Crée le RDV
         const rdvId = await publicModel.createRdv(entrepriseId, clientId, service_id, date_heure);
 
+        // Génère les rappels "avant" pour ce nouveau RDV
+        await rappelModel.genererRappels(
+            entrepriseId,
+            rdvId,
+            service_id,
+            clientId,
+            date_heure,
+            'avant'
+        );
+
         // Email de confirmation
         const entreprise = await publicModel.getEntrepriseInfo(entrepriseId);
         await emailService.envoyerConfirmationEmail(email, nom, service.nom, date_heure, entreprise.nom);
+
+        if (!req.entrepriseIdConnectee) {
+            emailService.envoyerNotificationEntreprise(
+                entreprise.email,
+                entreprise.nom,
+                nom,
+                service.nom,
+                date_heure);
+        }
 
         res.status(201).json({
             message: 'Rendez-vous confirmé ! Un email de confirmation vous a été envoyé.',

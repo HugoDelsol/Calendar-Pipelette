@@ -600,9 +600,9 @@ export default function Booking() {
                             )}
                         </p>
                         <div style={styles.recapRdv}>
-                            <p><strong>Service :</strong></p> <p>{selection.service?.nom}</p>
-                            <p><strong>Date :</strong> </p> <p>{formaterDateComplete(selection.creneau)}</p>
-                            <p><strong>Établissement :</strong></p> <p> {entreprise?.nom}</p>
+                            <p><strong>Service :</strong> {selection.service?.nom}</p>
+                            <p><strong>Date :</strong>  {formaterDateComplete(selection.creneau)}</p>
+                            <p><strong>Établissement :</strong>  {entreprise?.nom}</p>
                         </div>
                     </div>
                 )}

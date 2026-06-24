@@ -32,6 +32,7 @@ router.get('/:id', async (req, res, next) => {
 router.post('/', reglesRdv, valider, async (req, res, next) => {
     try {
         const { client_id, service_id, date_heure } = req.body;
+        
         if (!client_id || !service_id || !date_heure) {
             return res.status(400).json({ error: 'client_id, service_id et date_heure sont requis' });
         }
@@ -54,6 +55,8 @@ router.post('/', reglesRdv, valider, async (req, res, next) => {
 
         // 5. Tout est OK, on crée le RDV
         const id = await rdvModel.createRdv(req.entrepriseId, client_id, service_id, date_heure);
+        await rappelModel.genererRappels(req.entrepriseId, id, service_id, client_id, date_heure, 'avant');
+
         const rdv = await rdvModel.getRdvById(id, req.entrepriseId);
         res.status(201).json(rdv);
 
@@ -83,7 +86,8 @@ router.put('/:id', async (req, res, next) => {
                 req.params.id,
                 rdv.service_id,
                 rdv.client_id,
-                date_heure
+                date_heure,
+                'apres'
             );
             console.log(`${nbRappels} rappel(s) généré(s) pour le RDV #${req.params.id}`);
         }

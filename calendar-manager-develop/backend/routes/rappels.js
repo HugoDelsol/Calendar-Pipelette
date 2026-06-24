@@ -37,7 +37,7 @@ router.post('/templates', reglesTemplate, valider, async (req, res, next) => {
 // PUT /api/rappels/templates/:id
 router.put('/templates/:id', reglesTemplate, valider, async (req, res, next) => {
     try {
-        const { service_id, titre, message, delai_jours, actif } = req.body;
+        const { service_id, titre, message, delai_jours, actif, type } = req.body;
 
         if (actif) {
             const existeDeja = await rappelModel.getTemplateActifParService(req.entrepriseId, service_id, req.params.id);
@@ -46,7 +46,7 @@ router.put('/templates/:id', reglesTemplate, valider, async (req, res, next) => 
             }
         }
 
-        await rappelModel.updateTemplate(req.params.id, req.entrepriseId, service_id, titre, message, delai_jours, actif ?? true);
+        await rappelModel.updateTemplate(req.params.id, req.entrepriseId, service_id, titre, message, delai_jours, actif ?? true, type);
         res.json({ message: 'Template mis à jour' });
     } catch (err) {
         next(err);
